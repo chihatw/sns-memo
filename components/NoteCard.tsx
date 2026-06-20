@@ -1,7 +1,7 @@
 'use client';
 import { Note, Tag } from '@/lib/types';
-import { Check, Pencil, Trash2, X } from 'lucide-react';
-import { useState } from 'react';
+import { Check, ChevronDown, ChevronUp, Pencil, Trash2, X } from 'lucide-react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import TagInput from './TagInput';
 
 type Props = {
@@ -23,6 +23,19 @@ export default function NoteCard({ note, allTags, onUpdate, onDelete }: Props) {
   const [tags, setTags] = useState<string[]>(note.tags.map((t) => t.name));
   const [saving, setSaving] = useState(false);
   const [confirming, setConfirming] = useState(false);
+
+  // 本文の展開/折りたたみ
+  const [expanded, setExpanded] = useState(false);
+  const [clamped, setClamped] = useState(false); // 実際に4行を超えて省略されているか
+  const contentRef = useRef<HTMLParagraphElement>(null);
+
+  useLayoutEffect(() => {
+    if (editing || expanded) return;
+    const el = contentRef.current;
+    if (!el) return;
+    // 折りたたみ状態でscrollHeightとclientHeightを比較し、省略の有無を判定
+    setClamped(el.scrollHeight - el.clientHeight > 1);
+  }, [note.content, editing, expanded]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -85,8 +98,8 @@ export default function NoteCard({ note, allTags, onUpdate, onDelete }: Props) {
               onBlur={() => setConfirming(false)}
               className={`p-1.5 rounded-md transition-colors ${
                 confirming
-                  ? 'bg-red-900/40 text-red-400 border border-red-700/50'
-                  : 'text-gray-700 hover:text-red-400'
+                  ? 'bg-red-50 text-red-600 border border-red-300'
+                  : 'text-gray-700 hover:text-red-500'
               }`}
               title={confirming ? 'もう一度クリックで削除' : '削除'}
             >
@@ -123,9 +136,33 @@ export default function NoteCard({ note, allTags, onUpdate, onDelete }: Props) {
             className='w-full bg-transparent text-sm text-gray-900 outline-none resize-none leading-relaxed'
           />
         ) : (
-          <p className='text-sm text-gray-800 leading-relaxed whitespace-pre-wrap line-clamp-4'>
-            {note.content}
-          </p>
+          <div>
+            <p
+              ref={contentRef}
+              onClick={() => clamped && setExpanded((v) => !v)}
+              className={`text-sm text-gray-800 leading-relaxed whitespace-pre-wrap ${
+                expanded ? '' : 'line-clamp-4'
+              } ${clamped ? 'cursor-pointer' : ''}`}
+            >
+              {note.content}
+            </p>
+            {clamped && (
+              <button
+                onClick={() => setExpanded((v) => !v)}
+                className='flex items-center gap-0.5 text-xs text-gray-600 hover:text-gray-600/70 transition-colors mt-1'
+              >
+                {expanded ? (
+                  <>
+                    折りたたむ <ChevronUp size={12} />
+                  </>
+                ) : (
+                  <>
+                    続きを読む <ChevronDown size={12} />
+                  </>
+                )}
+              </button>
+            )}
+          </div>
         )}
 
         {/* タグ */}
