@@ -1,11 +1,17 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 * {
   box-sizing: border-box;
 }
 
 body {
-  font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+  font-family:
+    'Hiragino Sans',
+    'Hiragino Kaku Gothic ProN',
+    'Noto Sans JP',
+    system-ui,
+    -apple-system,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -14,12 +20,12 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #071210;
+  @apply bg-gray-50;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a4a35;
+  @apply bg-gray-200;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3a6a45;
+  @apply bg-gray-300;
 }
